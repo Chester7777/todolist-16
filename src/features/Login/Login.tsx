@@ -1,6 +1,11 @@
 import React from "react"
 import {Checkbox, FormControl, FormControlLabel, FormGroup, FormLabel, TextField, Button, Grid} from "@material-ui/core"
 import {useFormik} from "formik";
+import {useDispatch, useSelector} from "react-redux";
+import {LoginParamsType} from "../../api/todolists-api";
+import {loginTC} from "./authReducer";
+import {AppRootStateType} from "../../app/store";
+import {Redirect} from "react-router-dom";
 
 
 type FormikErrorType = {
@@ -11,6 +16,8 @@ type FormikErrorType = {
 
 
 export const Login = () => {
+    const dispatch = useDispatch();
+    const isLoggedIn = useSelector<AppRootStateType>(state => state.auth.isLoggedIn);
 
     const formik = useFormik({
         initialValues: {
@@ -24,14 +31,23 @@ export const Login = () => {
                 errors.email = "Required";
             } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)) {
                 errors.email = "Invalid email address";
+            } else if (values.password.length < 3) {
+                errors.password = "Short password"
+            } else if (!values.password) {
+                errors.password = "Required"
             }
             return errors;
         },
         onSubmit: values => {
-            alert(JSON.stringify(values));
+            // alert(JSON.stringify(values));
+            dispatch(loginTC(values))
+            formik.resetForm();
         },
     });
 
+    if (isLoggedIn) {
+        return <Redirect to={"/"}/>
+    }
 
     return <Grid container justify="center">
         <Grid item xs={4}>
@@ -51,20 +67,26 @@ export const Login = () => {
                         <TextField
                             label="Email"
                             margin="normal"
-                            name="email"
-                            onChange={formik.handleChange}
-                            value={formik.values.email}
+                            {...formik.getFieldProps("email")}
+                            onBlur={formik.handleBlur}
+                            // name="email"
+                            // onChange={formik.handleChange}
+                            // value={formik.values.email}
                         />
-                        {formik.errors.email ? <div style={{color: "red"}}>{formik.errors.email}</div> : null}
+                        {formik.touched.email && formik.errors.email ?
+                            <div style={{color: "red"}}>{formik.errors.email}</div> : null}
                         <TextField
                             type="password"
                             label="Password"
                             margin="normal"
-                            name="password"
-                            onChange={formik.handleChange}
-                            value={formik.values.password}
+                            {...formik.getFieldProps("password")}
+                            onBlur={formik.handleBlur}
+                            // name="password"
+                            // onChange={formik.handleChange}
+                            // value={formik.values.password}
                         />
-                        {formik.errors.password ? <div style={{color: "red"}}>{formik.errors.password}</div> : null}
+                        {formik.touched.password && formik.errors.password &&
+                        <div style={{color: "red"}}>{formik.errors.password}</div>}
                         <FormControlLabel
                             label={"Remember me"}
                             control={<Checkbox
