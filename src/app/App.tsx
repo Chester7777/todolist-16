@@ -67,7 +67,8 @@ function App({demo = false}: PropsType) {
                 </AppBar>
                 <Container fixed>
                     <Route exact path={'/'} render={() => <TodolistsList demo={demo}/>}/>
-                    <Route path={'/login'} render={() => <Login/>}/>
+                    {/*<Route path={'/login'} render={() => <Login/>}/>*/}
+                    <Route path={'*'} render={() => <Login/>}/>
                 </Container>
             </div>
     )
